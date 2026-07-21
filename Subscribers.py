@@ -1,12 +1,11 @@
+import os
 import requests
 import csv
 import io
 
-# Public, read-only CSV links from Google Sheets (File > Share > Publish to web > CSV)
-SUBSCRIBE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSu2LK1jTW_hkszTK65x6AQbSTowyciDGRi8AUQgNt0fn-mTCtKJUcSy7aM3c8Zk3pE1BjoAbMBZL6R/pub?gid=1011871837&single=true&output=csv"
-
-# Set this after creating a second Google Form for unsubscribes and publishing it the same way
-UNSUBSCRIBE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRlyuURwQkBCC9fwAl3PtpbMjntspQscGGx6l4kUyq4_SOIFIqF5GuiFFfXFzY4MVFx4byfmpfD-ujk/pub?gid=744171298&single=true&output=csv"
+# Required environment variables:
+#   SUBSCRIBE_CSV_URL   - published CSV link for the subscribe Google Form/Sheet
+#   UNSUBSCRIBE_CSV_URL - published CSV link for the unsubscribe Google Form/Sheet (optional)
 
 
 def _extract_emails_from_csv(csv_url):
@@ -44,8 +43,11 @@ def _extract_emails_from_csv(csv_url):
 
 def get_subscriber_emails():
     """Fetch the current list of subscriber emails, excluding anyone who unsubscribed."""
-    subscribed = _extract_emails_from_csv(SUBSCRIBE_CSV_URL)
-    unsubscribed = _extract_emails_from_csv(UNSUBSCRIBE_CSV_URL)
+    subscribe_url = os.environ.get("SUBSCRIBE_CSV_URL", "")
+    unsubscribe_url = os.environ.get("UNSUBSCRIBE_CSV_URL", "")
+
+    subscribed = _extract_emails_from_csv(subscribe_url)
+    unsubscribed = _extract_emails_from_csv(unsubscribe_url)
 
     active = subscribed - unsubscribed
     return list(active)
