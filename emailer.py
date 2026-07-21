@@ -11,6 +11,26 @@ SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 
 
+def build_html_body(title, post_text, link):
+    return f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+        <h2 style="color: #1a1a1a;">{title}</h2>
+        <p style="font-size: 15px; line-height: 1.5; color: #333;">{post_text}</p>
+        <p>
+          <a href="{link}" style="color: #1a73e8; text-decoration: none;">
+            Read the full article &rarr;
+          </a>
+        </p>
+        <hr style="border: none; border-top: 1px solid #eee; margin-top: 24px;">
+        <p style="font-size: 12px; color: #888;">
+          You're receiving this because you subscribed to AI News updates.
+        </p>
+      </body>
+    </html>
+    """
+
+
 def send_article_email(title, post_text, link):
     sender = os.environ.get("EMAIL_ADDRESS")
     password = os.environ.get("EMAIL_APP_PASSWORD")
@@ -22,9 +42,9 @@ def send_article_email(title, post_text, link):
         return
 
     subject = f"AI News: {title}"
-    body = f"{post_text}\n\nRead more: {link}"
+    html_body = build_html_body(title, post_text, link)
 
-    msg = MIMEText(body)
+    msg = MIMEText(html_body, "html")
     msg["Subject"] = subject
     msg["From"] = sender
     msg["To"] = sender  # keep individual addresses private, don't expose the full list to each other

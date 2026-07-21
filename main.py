@@ -3,7 +3,11 @@ from dedup import load_seen_links, save_seen_links, filter_new_articles
 from summarize import summarize_article
 from emailer import send_article_email
 
-FEED_URL = "https://techcrunch.com/category/artificial-intelligence/feed/"
+FEED_URLS = [
+    "https://techcrunch.com/category/artificial-intelligence/feed/",
+    "https://venturebeat.com/category/ai/feed/",
+    "https://www.theverge.com/ai-artificial-intelligence/rss/index.xml",
+]
 FETCH_LIMIT = 5
 
 
@@ -11,10 +15,13 @@ def run_pipeline():
     seen_links = load_seen_links()
     print(f"Already seen: {len(seen_links)} articles")
 
-    articles = fetch_latest_articles(FEED_URL, limit=FETCH_LIMIT)
-    new_articles = filter_new_articles(articles, seen_links)
+    all_articles = []
+    for feed_url in FEED_URLS:
+        all_articles.extend(fetch_latest_articles(feed_url, limit=FETCH_LIMIT))
 
-    print(f"Fetched: {len(articles)} | New: {len(new_articles)}\n")
+    new_articles = filter_new_articles(all_articles, seen_links)
+
+    print(f"Fetched: {len(all_articles)} | New: {len(new_articles)}\n")
 
     for i, article in enumerate(new_articles, start=1):
         print(f"--- New Article {i} ---")
