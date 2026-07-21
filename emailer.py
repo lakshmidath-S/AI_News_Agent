@@ -1,11 +1,11 @@
 import os
 import smtplib
 from email.mime.text import MIMEText
+from Subscribers import get_subscriber_emails
 
 # Required environment variables:
 #   EMAIL_ADDRESS       - your Gmail address (the sender)
 #   EMAIL_APP_PASSWORD  - the 16-character Gmail App Password (not your real password)
-#   EMAIL_TO            - address to send the digest to (can be the same as EMAIL_ADDRESS)
 
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
@@ -14,7 +14,12 @@ SMTP_PORT = 587
 def send_article_email(title, post_text, link):
     sender = os.environ.get("EMAIL_ADDRESS")
     password = os.environ.get("EMAIL_APP_PASSWORD")
-    recipient = os.environ.get("EMAIL_TO")
+
+    recipients = get_subscriber_emails()
+
+    if not recipients:
+        print("No subscribers found, skipping email.")
+        return
 
     subject = f"AI News: {title}"
     body = f"{post_text}\n\nRead more: {link}"
@@ -22,12 +27,12 @@ def send_article_email(title, post_text, link):
     msg = MIMEText(body)
     msg["Subject"] = subject
     msg["From"] = sender
-    msg["To"] = recipient
+    msg["To"] = sender  # keep individual addresses private, don't expose the full list to each other
 
     with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
         server.starttls()
         server.login(sender, password)
-        server.sendmail(sender, recipient, msg.as_string())
+        server.sendmail(sender, recipients, msg.as_string())
 
 
 if __name__ == "__main__":
