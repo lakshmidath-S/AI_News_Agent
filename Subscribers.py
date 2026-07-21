@@ -3,11 +3,6 @@ import requests
 import csv
 import io
 
-# Required environment variables:
-#   SUBSCRIBE_CSV_URL   - published CSV link for the subscribe Google Form/Sheet
-#   UNSUBSCRIBE_CSV_URL - published CSV link for the unsubscribe Google Form/Sheet (optional)
-
-
 def _extract_emails_from_csv(csv_url):
     if not csv_url:
         return set()

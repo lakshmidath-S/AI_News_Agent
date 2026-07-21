@@ -3,9 +3,6 @@ import smtplib
 from email.mime.text import MIMEText
 from Subscribers import get_subscriber_emails
 
-# Required environment variables:
-#   EMAIL_ADDRESS       - your Gmail address (the sender)
-#   EMAIL_APP_PASSWORD  - the 16-character Gmail App Password (not your real password)
 
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
@@ -47,7 +44,7 @@ def send_article_email(title, post_text, link):
     msg = MIMEText(html_body, "html")
     msg["Subject"] = subject
     msg["From"] = sender
-    msg["To"] = sender  # keep individual addresses private, don't expose the full list to each other
+    msg["To"] = sender
 
     with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
         server.starttls()
