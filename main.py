@@ -1,6 +1,6 @@
 from news_fetcher import fetch_latest_articles
 from dedup import load_seen_links, save_seen_links, filter_new_articles
-from summarizer import summarize_article
+from summarize import summarize_article
 from emailer import send_article_email
 
 FEED_URL = "https://techcrunch.com/category/artificial-intelligence/feed/"
