@@ -26,7 +26,8 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
           EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
-          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          SUBSCRIBE_CSV_URL: ${{ secrets.SUBSCRIBE_CSV_URL }}
+          UNSUBSCRIBE_CSV_URL: ${{ secrets.UNSUBSCRIBE_CSV_URL }}
         run: python main.py
 
       - name: Commit updated seen_articles.json
