@@ -2,7 +2,7 @@ name: AI News Pipeline
 
 on:
   schedule:
-    - cron: '0 */4 * * *'   # every 4 hours
+    - cron: '0 */2 * * *'   # every 4 hours
   workflow_dispatch:         # lets you trigger it manually from the Actions tab
 
 jobs:
