@@ -1,11 +1,17 @@
 import os
+import time
 import smtplib
 from email.mime.text import MIMEText
 from Subscribers import get_subscriber_emails
 
+# Required environment variables:
+#   EMAIL_ADDRESS       - your Gmail address (the sender)
+#   EMAIL_APP_PASSWORD  - the 16-character Gmail App Password (not your real password)
 
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
+
+UNSUBSCRIBE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc8LdRcNz1M_dRuuGyOW0OZdXJax4iw04oU00hR0oTXk0TAJg/viewform?usp=dialog"
 
 
 def build_html_body(title, post_text, link):
@@ -22,17 +28,30 @@ def build_html_body(title, post_text, link):
         <hr style="border: none; border-top: 1px solid #eee; margin-top: 24px;">
         <p style="font-size: 12px; color: #888;">
           You're receiving this because you subscribed to AI News updates.
+          <a href="{UNSUBSCRIBE_FORM_URL}" style="color: #888;">Unsubscribe</a>
         </p>
       </body>
     </html>
     """
 
 
-def send_article_email(title, post_text, link):
+def get_recipients_with_retry(max_retries=3, retry_delay=10):
+    """Fetch subscriber list, retrying on transient network errors."""
+    for attempt in range(1, max_retries + 1):
+        try:
+            return get_subscriber_emails()
+        except Exception as e:
+            print(f"Failed to fetch subscribers (attempt {attempt}/{max_retries}): {e}")
+            if attempt < max_retries:
+                time.sleep(retry_delay)
+            else:
+                print("Giving up on fetching subscribers for this run.")
+                return []
+
+
+def send_article_email(title, post_text, link, recipients):
     sender = os.environ.get("EMAIL_ADDRESS")
     password = os.environ.get("EMAIL_APP_PASSWORD")
-
-    recipients = get_subscriber_emails()
 
     if not recipients:
         print("No subscribers found, skipping email.")
@@ -44,7 +63,7 @@ def send_article_email(title, post_text, link):
     msg = MIMEText(html_body, "html")
     msg["Subject"] = subject
     msg["From"] = sender
-    msg["To"] = sender
+    msg["To"] = sender  # keep individual addresses private, don't expose the full list to each other
 
     with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
         server.starttls()

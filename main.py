@@ -1,7 +1,7 @@
 from news_fetcher import fetch_latest_articles
 from dedup import load_seen_links, save_seen_links, filter_new_articles
 from summarize import summarize_article
-from emailer import send_article_email
+from emailer import send_article_email, get_recipients_with_retry
 
 FEED_URLS = [
     "https://techcrunch.com/category/artificial-intelligence/feed/",
@@ -23,6 +23,14 @@ def run_pipeline():
 
     print(f"Fetched: {len(all_articles)} | New: {len(new_articles)}\n")
 
+    if not new_articles:
+        save_seen_links(seen_links)
+        print("Nothing new. Done.")
+        return
+
+    recipients = get_recipients_with_retry()
+    print(f"Sending to {len(recipients)} subscriber(s)\n")
+
     for i, article in enumerate(new_articles, start=1):
         print(f"--- New Article {i} ---")
         print("Title:", article["title"])
@@ -33,7 +41,7 @@ def run_pipeline():
         print(post_text)
         print(f"(Length: {len(post_text)} characters)")
 
-        send_article_email(article["title"], post_text, article["link"])
+        send_article_email(article["title"], post_text, article["link"], recipients)
         print("Email sent.\n")
 
         seen_links.add(article["link"])
